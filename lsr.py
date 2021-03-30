@@ -47,9 +47,26 @@ def seperate_options_and_filenames(args):
 
     return opts, fnames
 
+def least_squares_matrix(X, Y):
+    return np.linalg.inv(X.T.dot(X)).dot(X.T).dot(Y)
 
-def calc_total_reconstruction_error(xs, ys):
-    return 0
+def square_error(y, y_h):
+    return np.sum((y - y_h) ** 2)
+
+def calc_total_reconstruction_error(isPlot, xs, ys):
+    xe = np.column_stack((np.ones(xs.shape), xs))
+    a, b = least_squares_matrix(xe, ys)
+    y_h = a + b * xs
+    xmin = xs.min()
+    xmax = xs.max()
+    ymin = a + b * xmin
+    ymax = a + b * xmax
+    if isPlot:
+        fig, ax = plt.subplots()
+        ax.scatter(xs, ys)
+        ax.plot([xmin, xmax], [ymin, ymax], c="#FF5955")
+        plt.show()
+    return square_error(ys, y_h)
 
 def main(argv):
     opts, fnames = seperate_options_and_filenames(argv)
@@ -61,9 +78,6 @@ def main(argv):
 
     for fname in fnames:
         xs, ys = load_points_from_file(fname)
-        if isPlot:
-            view_data_segments(xs, ys)
-        
-        print(calc_total_reconstruction_error(xs, ys))
+        print(calc_total_reconstruction_error(isPlot, xs, ys))
 
 main(sys.argv[1:])
