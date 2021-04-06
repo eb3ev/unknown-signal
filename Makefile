@@ -2,7 +2,7 @@ all: basic adv noise
 
 allPlot: basicPlot advPlot noisePlot
 
-basic: basic1 basic2 basic3 basic4
+basic: basic1 basic2 basic3 basic4 basic5
 
 basic1:
 	python lsr.py train_data/basic_1.csv
@@ -15,6 +15,9 @@ basic3:
 
 basic4:
 	python lsr.py train_data/basic_4.csv
+
+basic5:
+	python lsr.py train_data/basic_5.csv
 
 adv: adv1 adv2 adv3
 
@@ -38,7 +41,7 @@ noise2:
 noise3:
 	python lsr.py train_data/noise_3.csv
 
-basicPlot: basic1Plot basic2Plot basic3Plot basic4Plot
+basicPlot: basic1Plot basic2Plot basic3Plot basic4Plot basic5Plot
 
 basic1Plot:
 	python lsr.py train_data/basic_1.csv --plot
@@ -51,6 +54,9 @@ basic3Plot:
 
 basic4Plot:
 	python lsr.py train_data/basic_4.csv --plot
+
+basic5Plot:
+	python lsr.py train_data/basic_5.csv --plot
 
 advPlot: adv1Plot adv2Plot adv3Plot
 
