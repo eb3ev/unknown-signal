@@ -4,6 +4,8 @@ import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
 
+SEGMENT_SIZE = 20
+
 available_args = [
         "--plot",
         "--equation",
@@ -20,7 +22,7 @@ def load_points_from_file(filename):
     points = pd.read_csv(filename, header=None)
     return points[0].values, points[1].values
 
-def view_data_segments(xs, ys):
+def view_data_segments(xs, ys, segment_size = SEGMENT_SIZE):
     """Visualises the input file with each segment plotted in a different colour.
     Args:
         xs : List/array-like of x co-ordinates.
@@ -29,10 +31,10 @@ def view_data_segments(xs, ys):
         None
     """
     assert len(xs) == len(ys)
-    assert len(xs) % 20 == 0
+    assert len(xs) % segment_size == 0
     len_data = len(xs)
-    num_segments = len_data // 20
-    colour = np.concatenate([[i] * 20 for i in range(num_segments)])
+    num_segments = len_data // segment_size
+    colour = np.concatenate([[i] * segment_size for i in range(num_segments)])
     plt.set_cmap('Dark2')
     plt.scatter(xs, ys, c=colour)
     plt.show()
@@ -59,7 +61,7 @@ models = [
         lambda x, a, b, c: a + b*x + c*x**2, # 1: Quadratic
         lambda x, a, b, c, d: a + b*x + c*x**2 + d*x**3, # 2: Cubic
         lambda x, a, b, c, d, e: a + b*x + c*x**2 + d*x**3 + e*x**4, # 3: Quartic
-        lambda x, a, b, c, d, e, f: a + b*x + c*x**2 + d*x**3 + e*x**4 + a*x**5, # 4: Quintic
+        lambda x, a, b, c, d, e, f: a + b*x + c*x**2 + d*x**3 + e*x**4 + f*x**5, # 4: Quintic
         lambda x, a, b: a + b*np.exp(x), # 6: Exponential
         lambda x, a, b: a + b*np.sin(x), # 7: Sine
         lambda x, a, b: a + b*np.cos(x), # 8: Cosine
@@ -170,7 +172,7 @@ def fit_best(xs, ys, segment, isShowEquation, isVerbose):
 
 def total_err(xs, ys, isPlot, isShowEquation, isVerbose):
     err = 0
-    for i in range(num_line_segments(xs)):
+    for i in range(num_line_segments(xs, SEGMENT_SIZE)):
         seg_x, seg_y = get_line_segment(xs, ys, i)
 
         new_xs, new_ys, yh = fit_best(seg_x, seg_y, i+1, isShowEquation, isVerbose)
@@ -181,16 +183,16 @@ def total_err(xs, ys, isPlot, isShowEquation, isVerbose):
     
     return err
 
-def num_line_segments(data_points, segment_size = 20):
-    assert len(data_points) % 20 == 0
+def num_line_segments(data_points, segment_size):
+    assert len(data_points) % segment_size == 0
     return len(data_points) // segment_size
 
 # Order 1 means the first segment.
-def get_line_segment(xs, ys, order):
+def get_line_segment(xs, ys, order, segment_size = SEGMENT_SIZE):
     assert len(xs) == len(ys)
-    assert len(xs) % 20 == 0
+    assert len(xs) % segment_size == 0
     len_data = len(xs)
-    num_segments = num_line_segments(xs)
+    num_segments = num_line_segments(xs, segment_size)
 
     start = len_data // num_segments * order
     end = start + (len_data // num_segments)
@@ -219,15 +221,17 @@ def main(argv):
     else:
         isPlot = False
 
-    if "--equation" in opts:
+    if "-e" in opts:
         isShowEquation = True
     else:
         isShowEquation = False
 
-    if "--verbose" in opts:
+    if "-v" in opts:
         isVerbose = True
     else:
         isVerbose = False
+
+    isShowEquation = True
 
     for fname in fnames:
         xs, ys = load_points_from_file(fname)
