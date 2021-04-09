@@ -58,35 +58,35 @@ def fit_line_of_best_fit(xs, model, *args):
 
 models = [
         lambda x, a, b: a + b*x, # 0: Linear
-        lambda x, a, b, c: a + b*x + c*x**2, # 1: Quadratic
+        # lambda x, a, b, c: a + b*x + c*x**2, # 1: Quadratic
         lambda x, a, b, c, d: a + b*x + c*x**2 + d*x**3, # 2: Cubic
-        lambda x, a, b, c, d, e: a + b*x + c*x**2 + d*x**3 + e*x**4, # 3: Quartic
-        lambda x, a, b, c, d, e, f: a + b*x + c*x**2 + d*x**3 + e*x**4 + f*x**5, # 4: Quintic
-        lambda x, a, b: a + b*np.exp(x), # 6: Exponential
+        # lambda x, a, b, c, d, e: a + b*x + c*x**2 + d*x**3 + e*x**4, # 3: Quartic
+        # lambda x, a, b, c, d, e, f: a + b*x + c*x**2 + d*x**3 + e*x**4 + f*x**5, # 4: Quintic
+        # lambda x, a, b: a + b*np.exp(x), # 6: Exponential
         lambda x, a, b: a + b*np.sin(x), # 7: Sine
-        lambda x, a, b: a + b*np.cos(x), # 8: Cosine
+        # lambda x, a, b: a + b*np.cos(x), # 8: Cosine
 ]
 
 modelNames = [
         "Linear",
-        "Quadratic",
+        # "Quadratic",
         "Cubic",
-        "Quartic",
-        "Quintic",
-        "Exponential",
+        # "Quartic",
+        # "Quintic",
+        # "Exponential",
         "Sine",
-        "Cosine"
+        # "Cosine"
 ]
 
 modelEquations = [
         "a + bx", # 0: Linear
-        "a + bx + cx^2", # 1: Quadratic
+        # "a + bx + cx^2", # 1: Quadratic
         "a + bx + cx^2 + dx^3", # 2: Cubic
-        "a + bx + cx^2 + dx^3 + ex^4", # 3: Quartic
-        "a + bx + cx^2 + dx^3 + ex^4 + fx^5", # 4: Quintic
-        "a + be^x", # 5: Exponential
+        # "a + bx + cx^2 + dx^3 + ex^4", # 3: Quartic
+        # "a + bx + cx^2 + dx^3 + ex^4 + fx^5", # 4: Quintic
+        # "a + be^x", # 5: Exponential
         "a + bsin(x)", # 6: Sine
-        "a + bcos(x)" # 7: Cosine
+        # "a + bcos(x)" # 7: Cosine
 ]
 
 def fit_linear(xs):
@@ -130,16 +130,16 @@ def fit_cos(xs):
 
 feature_vectors = [
         fit_linear,
-        fit_quadratic,
+        # fit_quadratic,
         fit_cubic,
-        fit_quartic,
-        fit_quintic,
-        fit_exp,
+        # fit_quartic,
+        # fit_quintic,
+        # fit_exp,
         fit_sin,
-        fit_cos
+        # fit_cos
 ]
 
-def k_fold_train_and_test_sets(xs, ys, k = 5, index = 0):
+def k_fold_train_and_test_sets(xs, ys, k = 10, index = 0):
     assert k > index
     assert len(xs) >= k
 
@@ -167,7 +167,7 @@ def k_fold_train_and_test_sets(xs, ys, k = 5, index = 0):
     return train_xs, train_ys, test_xs, test_ys
 
 def cross_validation(xs, ys, feature_vector, model):
-    k = 5
+    k = 10
     err = 0
     for i in range(k):
         train_xs, train_ys, test_xs, test_ys = k_fold_train_and_test_sets(xs, ys, k, i)
@@ -177,6 +177,7 @@ def cross_validation(xs, ys, feature_vector, model):
 
         err += square_err(test_ys, yh)
 
+    print(err / k)
     return err / k
 
 def fit_best(xs, ys, segment, isShowEquation, isVerbose):
