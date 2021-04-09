@@ -139,6 +139,46 @@ feature_vectors = [
         fit_cos
 ]
 
+def k_fold_train_and_test_sets(xs, ys, k = 5, index = 0):
+    assert k > index
+    assert len(xs) >= k
+
+    len_data = len(xs)
+    len_fold = len_data // k
+    train_xs, train_ys, test_xs, test_ys = np.array([]), np.array([]), np.array([]), np.array([])
+
+
+
+    start = 0
+    end = start + len_fold
+    
+    for i in range(k):
+        if i == k - 1:
+            end = len_data
+        if i == index:
+            test_xs = np.append(test_xs, xs[start:end])
+            test_ys = np.append(test_ys, ys[start:end])
+        else:
+            train_xs = np.append(train_xs, xs[start:end])
+            train_ys = np.append(train_ys, ys[start:end])
+        start += len_fold
+        end += len_fold
+
+    return train_xs, train_ys, test_xs, test_ys
+
+def cross_validation(xs, ys, feature_vector, model):
+    k = 5
+    err = 0
+    for i in range(k):
+        train_xs, train_ys, test_xs, test_ys = k_fold_train_and_test_sets(xs, ys, k, i)
+        xe = feature_vector(train_xs)
+        wh = fit_wh(xe, train_ys)
+        yh = model(test_xs, *wh)
+
+        err += square_err(test_ys, yh)
+
+    return err / k
+
 def fit_best(xs, ys, segment, isShowEquation, isVerbose):
     """Visualises the input file with each segment plotted in a different colour.
     Args:
@@ -150,13 +190,18 @@ def fit_best(xs, ys, segment, isShowEquation, isVerbose):
     """
     vals = []
     errs = []
+    use_cross_validation = True
     for i, model in enumerate(models):
+
         xe = feature_vectors[i](xs)
         wh = fit_wh(xe, ys)
         yh = model(xs, *wh)
         new_xs, new_ys = fit_line_of_best_fit(xs, model, *wh)
         vals.append([new_xs, new_ys, yh])
-        err = square_err(ys, yh)
+        if use_cross_validation:
+            err = cross_validation(xs, ys, feature_vectors[i], model)
+        else:
+            err = square_err(ys, yh)
         errs.append(err)
 
     index = errs.index(min(errs))
