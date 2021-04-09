@@ -2,6 +2,7 @@ import os
 import sys
 import pandas as pd
 import numpy as np
+import random
 from matplotlib import pyplot as plt
 
 SEGMENT_SIZE = 20
@@ -56,39 +57,6 @@ def fit_line_of_best_fit(xs, model, *args):
     new_ys = model(new_xs, *args)
     return new_xs, new_ys
 
-models = [
-        lambda x, a, b: a + b*x, # 0: Linear
-        # lambda x, a, b, c: a + b*x + c*x**2, # 1: Quadratic
-        lambda x, a, b, c, d: a + b*x + c*x**2 + d*x**3, # 2: Cubic
-        # lambda x, a, b, c, d, e: a + b*x + c*x**2 + d*x**3 + e*x**4, # 3: Quartic
-        # lambda x, a, b, c, d, e, f: a + b*x + c*x**2 + d*x**3 + e*x**4 + f*x**5, # 4: Quintic
-        # lambda x, a, b: a + b*np.exp(x), # 6: Exponential
-        lambda x, a, b: a + b*np.sin(x), # 7: Sine
-        # lambda x, a, b: a + b*np.cos(x), # 8: Cosine
-]
-
-modelNames = [
-        "Linear",
-        # "Quadratic",
-        "Cubic",
-        # "Quartic",
-        # "Quintic",
-        # "Exponential",
-        "Sine",
-        # "Cosine"
-]
-
-modelEquations = [
-        "a + bx", # 0: Linear
-        # "a + bx + cx^2", # 1: Quadratic
-        "a + bx + cx^2 + dx^3", # 2: Cubic
-        # "a + bx + cx^2 + dx^3 + ex^4", # 3: Quartic
-        # "a + bx + cx^2 + dx^3 + ex^4 + fx^5", # 4: Quintic
-        # "a + be^x", # 5: Exponential
-        "a + bsin(x)", # 6: Sine
-        # "a + bcos(x)" # 7: Cosine
-]
-
 def fit_linear(xs):
     xe = add_bias(xs)
     return xe
@@ -128,56 +96,98 @@ def fit_cos(xs):
     xe = add_bias(xe)
     return xe
 
-feature_vectors = [
-        fit_linear,
-        # fit_quadratic,
-        fit_cubic,
-        # fit_quartic,
-        # fit_quintic,
-        # fit_exp,
-        fit_sin,
-        # fit_cos
+def fit_nine(xs):
+    xe = fit_quintic(xs)
+    xe = add_polynomial_term(xe, xs, 6)
+    xe = add_polynomial_term(xe, xs, 7)
+    xe = add_polynomial_term(xe, xs, 8)
+    xe = add_polynomial_term(xe, xs, 9)
+    return xe
+
+
+models = [
+        # Lambda Equations                                                        Feature Vectors   Name           Equation
+        [lambda x, a, b: a + b*x,                                                 fit_linear,       "Linear",      "a + bx"                            ],
+        # [lambda x, a, b, c: a + b*x + c*x**2,                                     fit_quadratic,    "Quadratic",   "a + bx + cx^2"                     ],
+        [lambda x, a, b, c, d: a + b*x + c*x**2 + d*x**3,                         fit_cubic,        "Cubic",       "a + bx + cx^2 + dx^3"              ],
+        # [lambda x, a, b, c, d, e: a + b*x + c*x**2 + d*x**3 + e*x**4,             fit_quartic,      "Quartic",     "a + bx + cx^2 + dx^3 + ex^4"       ],
+        # [lambda x, a, b, c, d, e, f: a + b*x + c*x**2 + d*x**3 + e*x**4 + f*x**5, fit_quintic,      "Quintic",     "a + bx + cx^2 + dx^3 + ex^4 + fx^5"],
+        # [lambda x, a, b, c, d, e, f, g, h, i, j: a + b*x + c*x**2 + d*x**3 + e*x**4 + f*x**5 + g*x**6 + h*x**7 + i*x**8 + j*x**9, fit_nine, "nine", "nine"],
+        # [lambda x, a, b: a + b*np.exp(x),                                         fit_exp,          "Exponential", "a + be^x"                          ],
+        [lambda x, a, b: a + b*np.sin(x),                                         fit_sin,          "Sine",        "a + bsin(x)"                       ],
+        # [lambda x, a, b: a + b*np.cos(x),                                         fit_cos,          "Cosine",      "a + bcos(x)"                       ],
 ]
 
-def k_fold_train_and_test_sets(xs, ys, k = 10, index = 0):
-    assert k > index
+def k_fold_parts(xs, ys, k = 10, randomize = False):
     assert len(xs) >= k
 
     len_data = len(xs)
     len_fold = len_data // k
-    train_xs, train_ys, test_xs, test_ys = np.array([]), np.array([]), np.array([]), np.array([])
+
+    x_parts = [np.array([])]
+    y_parts = [np.array([])]
+    for i in range(k - 1):
+        x_parts.append(np.array([]))
+        y_parts.append(np.array([]))
 
 
+    if randomize:
+        part = 0
+        used_indices = []
+        for _ in range(len(xs)):
+            index = random.randint(0, len_data - 1)
+            for _ in used_indices:
+                if not index in used_indices:
+                    break
+                else:
+                    index = random.randint(0, len_data - 1)
+                    used_indices.append(index)
 
-    start = 0
-    end = start + len_fold
-    
-    for i in range(k):
-        if i == k - 1:
-            end = len_data
-        if i == index:
-            test_xs = np.append(test_xs, xs[start:end])
-            test_ys = np.append(test_ys, ys[start:end])
-        else:
-            train_xs = np.append(train_xs, xs[start:end])
-            train_ys = np.append(train_ys, ys[start:end])
-        start += len_fold
-        end += len_fold
+            x_parts[part] = np.append(x_parts[part], xs[index])
+            y_parts[part] = np.append(y_parts[part], ys[index])
+            len_data -= 1
+            if len(x_parts[part]) >= len_fold and part < k - 1:
+                part += 1
+    else:
+        start = 0
+        end = start + len_fold
+        
+        for i in range(k):
+            if i == k - 1:
+                end = len_data
 
-    return train_xs, train_ys, test_xs, test_ys
+            x_parts[i] = np.append(x_parts[i], xs[start:end])
+            y_parts[i] = np.append(y_parts[i], ys[start:end])
+
+            start += len_fold
+            end += len_fold
+
+    return x_parts, y_parts
 
 def cross_validation(xs, ys, feature_vector, model):
     k = 10
     err = 0
+    x_parts, y_parts = k_fold_parts(xs, ys, k, False)
+
     for i in range(k):
-        train_xs, train_ys, test_xs, test_ys = k_fold_train_and_test_sets(xs, ys, k, i)
+        train_xs, train_ys, test_xs, test_ys = np.array([]), np.array([]), np.array([]), np.array([])
+        for j, part in enumerate(x_parts):
+            if i == j:
+                test_xs = np.append(test_xs, part)
+            else:
+                train_xs = np.append(train_xs, part)
+        for j, part in enumerate(y_parts):
+            if i == j:
+                test_ys = np.append(test_ys, part)
+            else:
+                train_ys = np.append(train_ys, part)
+
         xe = feature_vector(train_xs)
         wh = fit_wh(xe, train_ys)
         yh = model(test_xs, *wh)
 
         err += square_err(test_ys, yh)
 
-    print(err / k)
     return err / k
 
 def fit_best(xs, ys, segment, isShowEquation, isVerbose):
@@ -193,14 +203,13 @@ def fit_best(xs, ys, segment, isShowEquation, isVerbose):
     errs = []
     use_cross_validation = True
     for i, model in enumerate(models):
-
-        xe = feature_vectors[i](xs)
+        xe = model[1](xs)
         wh = fit_wh(xe, ys)
-        yh = model(xs, *wh)
-        new_xs, new_ys = fit_line_of_best_fit(xs, model, *wh)
+        yh = model[0](xs, *wh)
+        new_xs, new_ys = fit_line_of_best_fit(xs, model[0], *wh)
         vals.append([new_xs, new_ys, yh])
         if use_cross_validation:
-            err = cross_validation(xs, ys, feature_vectors[i], model)
+            err = cross_validation(xs, ys, model[1], model[0])
         else:
             err = square_err(ys, yh)
         errs.append(err)
@@ -208,9 +217,9 @@ def fit_best(xs, ys, segment, isShowEquation, isVerbose):
     index = errs.index(min(errs))
 
     if isShowEquation:
-        info = "Segment {}: {}".format(segment,modelNames[index])
+        info = "Segment {}: {}".format(segment,models[index][2])
         if isVerbose:
-            info += " :: {}".format(modelEquations[index])
+            info += " :: {}".format(models[index][3])
         print(info)
 
     fit = vals[index]
@@ -223,7 +232,7 @@ def total_err(xs, ys, isPlot, isShowEquation, isVerbose):
 
         new_xs, new_ys, yh = fit_best(seg_x, seg_y, i+1, isShowEquation, isVerbose)
         
-        err += err + square_err(seg_y, yh) 
+        err += square_err(seg_y, yh) 
         if isPlot:
             plt.plot(new_xs, new_ys, c="#FF7A77")
     
