@@ -6,11 +6,14 @@ import random
 from matplotlib import pyplot as plt
 
 SEGMENT_SIZE = 20
+K_FOLD = 10
 
 available_args = [
         "--plot",
-        "--equation",
-        "--verbose"
+        "--no-cross-validation",
+        "-k",
+        "--random-k-fold",
+        "-v",
 ]
 
 def load_points_from_file(filename):
@@ -81,6 +84,31 @@ def fit_quintic(xs):
     xe = add_polynomial_term(xe, xs, 5)
     return xe
 
+def fit_6th_order(xs):
+    xe = fit_quintic(xs)
+    xe = add_polynomial_term(xe, xs, 6)
+    return xe
+
+def fit_7th_order(xs):
+    xe = fit_6th_order(xs)
+    xe = add_polynomial_term(xe, xs, 7)
+    return xe
+
+def fit_8th_order(xs):
+    xe = fit_7th_order(xs)
+    xe = add_polynomial_term(xe, xs, 8)
+    return xe
+
+def fit_9th_order(xs):
+    xe = fit_8th_order(xs)
+    xe = add_polynomial_term(xe, xs, 9)
+    return xe
+
+def fit_10th_order(xs):
+    xe = fit_9th_order(xs)
+    xe = add_polynomial_term(xe, xs, 10)
+    return xe
+
 def fit_exp(xs):
     xe = np.exp(xs)
     xe = add_bias(xe)
@@ -96,30 +124,99 @@ def fit_cos(xs):
     xe = add_bias(xe)
     return xe
 
-def fit_nine(xs):
-    xe = fit_quintic(xs)
-    xe = add_polynomial_term(xe, xs, 6)
-    xe = add_polynomial_term(xe, xs, 7)
-    xe = add_polynomial_term(xe, xs, 8)
-    xe = add_polynomial_term(xe, xs, 9)
-    return xe
-
-
+# List of the functions of the models accompanied by their feature vector functions.
 models = [
-        # Lambda Equations                                                        Feature Vectors   Name           Equation
-        [lambda x, a, b: a + b*x,                                                 fit_linear,       "Linear",      "a + bx"                            ],
-        # [lambda x, a, b, c: a + b*x + c*x**2,                                     fit_quadratic,    "Quadratic",   "a + bx + cx^2"                     ],
-        [lambda x, a, b, c, d: a + b*x + c*x**2 + d*x**3,                         fit_cubic,        "Cubic",       "a + bx + cx^2 + dx^3"              ],
-        # [lambda x, a, b, c, d, e: a + b*x + c*x**2 + d*x**3 + e*x**4,             fit_quartic,      "Quartic",     "a + bx + cx^2 + dx^3 + ex^4"       ],
-        # [lambda x, a, b, c, d, e, f: a + b*x + c*x**2 + d*x**3 + e*x**4 + f*x**5, fit_quintic,      "Quintic",     "a + bx + cx^2 + dx^3 + ex^4 + fx^5"],
-        # [lambda x, a, b, c, d, e, f, g, h, i, j: a + b*x + c*x**2 + d*x**3 + e*x**4 + f*x**5 + g*x**6 + h*x**7 + i*x**8 + j*x**9, fit_nine, "nine", "nine"],
-        # [lambda x, a, b: a + b*np.exp(x),                                         fit_exp,          "Exponential", "a + be^x"                          ],
-        [lambda x, a, b: a + b*np.sin(x),                                         fit_sin,          "Sine",        "a + bsin(x)"                       ],
-        # [lambda x, a, b: a + b*np.cos(x),                                         fit_cos,          "Cosine",      "a + bcos(x)"                       ],
+        [
+            "Linear",
+            fit_linear,
+            lambda x, a, b: a + b*x
+        ],    
+        [
+            "Quadratic",
+            fit_quadratic,
+            lambda x, a, b, c: a + b*x + c*x**2
+        ],
+        [
+            "Cubic",
+            fit_cubic,
+            lambda x, a, b, c, d: a + b*x + c*x**2 + d*x**3
+        ],
+        [
+            "Quartic",
+            fit_quartic,
+            lambda x, a, b, c, d, e: a + b*x + c*x**2 + d*x**3 + e*x**4
+        ],
+        [
+            "Quintic",
+            fit_quintic,
+            lambda x, a, b, c, d, e, f: a + b*x + c*x**2 + d*x**3 + e*x**4 + f*x**5
+        ],
+        [
+            "6th Order Polynomial",
+            fit_6th_order,
+            lambda x, a, b, c, d, e, f, g: a + b*x + c*x**2 + d*x**3 + e*x**4 + f*x**5 + g*x**6
+
+        ],
+        [
+            "7th Order Polynomial",
+            fit_7th_order,
+            lambda x, a, b, c, d, e, f, g, h: a + b*x + c*x**2 + d*x**3 + e*x**4 + f*x**5 + g*x**6 + h*x**7
+        ],
+        [
+            "8th Order Polynomial",
+            fit_8th_order,
+            lambda x, a, b, c, d, e, f, g, h, i: a + b*x + c*x**2 + d*x**3 + e*x**4 + f*x**5 + g*x**6 + h*x**7 + i*x**8
+        ],
+        [
+            "9th Order",
+            fit_9th_order,
+            lambda x, a, b, c, d, e, f, g, h, i, j: a + b*x + c*x**2 + d*x**3 + e*x**4 + f*x**5 + g*x**6 + h*x**7 + i*x**8 + j*x**9
+        ],
+        [
+            "10th Order",
+            fit_10th_order,
+            lambda x, a, b, c, d, e, f, g, h, i, j, k: a + b*x + c*x**2 + d*x**3 + e*x**4 + f*x**5 + g*x**6 + h*x**7 + i*x**8 + j*x**9 + k*x**10
+        ],
+        [
+            "Exponential",
+            fit_exp,
+            lambda x, a, b: a + b*np.exp(x)
+        ],
+        [
+            "Sine",
+            fit_sin,
+            lambda x, a, b: a + b*np.sin(x)
+        ],
+        [
+            "Cosine",
+            fit_cos,
+            lambda x, a, b: a + b*np.cos(x)
+        ],
+]
+
+# Comment out models to not not include in training.
+model_whitelist = [
+        0, # Linear
+        # 1, # Quadratic
+        2, # Cubic
+        # 3, # Quadratic
+        # 4, # Quintic
+        # 5, # 6th Order Polynomial
+        # 6, # 7th Order Polynomial
+        # 7, # 8th Order Polynomoal
+        # 8, # 9th Order Polynomial
+        # 9, # 10th Order Polynomial
+        # 10, # Exponential
+        11, # Sine
+        # 12, # Cosine
 ]
 
 def k_fold_parts(xs, ys, k = 10, randomize = False):
     assert len(xs) >= k
+    assert k >= 2
+
+    if k == 1:
+        return [xs], [ys]
 
     len_data = len(xs)
     len_fold = len_data // k
@@ -130,22 +227,13 @@ def k_fold_parts(xs, ys, k = 10, randomize = False):
         x_parts.append(np.array([]))
         y_parts.append(np.array([]))
 
-
     if randomize:
         part = 0
-        used_indices = []
-        for _ in range(len(xs)):
-            index = random.randint(0, len_data - 1)
-            for _ in used_indices:
-                if not index in used_indices:
-                    break
-                else:
-                    index = random.randint(0, len_data - 1)
-                    used_indices.append(index)
-
-            x_parts[part] = np.append(x_parts[part], xs[index])
-            y_parts[part] = np.append(y_parts[part], ys[index])
-            len_data -= 1
+        indices = list(range(len_data))
+        random.shuffle(indices)
+        for i in indices:
+            x_parts[part] = np.append(x_parts[part], xs[i])
+            y_parts[part] = np.append(y_parts[part], ys[i])
             if len(x_parts[part]) >= len_fold and part < k - 1:
                 part += 1
     else:
@@ -164,11 +252,9 @@ def k_fold_parts(xs, ys, k = 10, randomize = False):
 
     return x_parts, y_parts
 
-def cross_validation(xs, ys, feature_vector, model):
-    k = 10
+def cross_validation(xs, ys, feature_vector, model, k = K_FOLD, rand_k_fold = False):
     err = 0
-    x_parts, y_parts = k_fold_parts(xs, ys, k, False)
-
+    x_parts, y_parts = k_fold_parts(xs, ys, k, rand_k_fold)
     for i in range(k):
         train_xs, train_ys, test_xs, test_ys = np.array([]), np.array([]), np.array([]), np.array([])
         for j, part in enumerate(x_parts):
@@ -190,7 +276,7 @@ def cross_validation(xs, ys, feature_vector, model):
 
     return err / k
 
-def fit_best(xs, ys, segment, isShowEquation, isVerbose):
+def fit_best(xs, ys, segment, use_cross_validation = True, k = K_FOLD, rand_k_fold = False, verbose = False):
     """Visualises the input file with each segment plotted in a different colour.
     Args:
         xs : List/array-like of x co-ordinates.
@@ -201,39 +287,37 @@ def fit_best(xs, ys, segment, isShowEquation, isVerbose):
     """
     vals = []
     errs = []
-    use_cross_validation = True
     for i, model in enumerate(models):
-        xe = model[1](xs)
-        wh = fit_wh(xe, ys)
-        yh = model[0](xs, *wh)
-        new_xs, new_ys = fit_line_of_best_fit(xs, model[0], *wh)
-        vals.append([new_xs, new_ys, yh])
-        if use_cross_validation:
-            err = cross_validation(xs, ys, model[1], model[0])
-        else:
-            err = square_err(ys, yh)
-        errs.append(err)
+        if i in model_whitelist:
+            xe = model[1](xs)
+            wh = fit_wh(xe, ys)
+            yh = model[2](xs, *wh)
+            new_xs, new_ys = fit_line_of_best_fit(xs, model[2], *wh)
+            vals.append([new_xs, new_ys, yh])
+            if use_cross_validation:
+                err = cross_validation(xs, ys, model[1], model[2], k , rand_k_fold)
+            else:
+                err = square_err(ys, yh)
+            errs.append(err)
 
     index = errs.index(min(errs))
 
-    if isShowEquation:
-        info = "Segment {}: {}".format(segment,models[index][2])
-        if isVerbose:
-            info += " :: {}".format(models[index][3])
+    if verbose:
+        info = "Segment {}: {}".format(segment,models[index][0])
         print(info)
 
     fit = vals[index]
     return fit
 
-def total_err(xs, ys, isPlot, isShowEquation, isVerbose):
+def total_err(xs, ys, use_cross_validation = True, k = K_FOLD, rand_k_fold = False, plot = False, verbose = False):
     err = 0
     for i in range(num_line_segments(xs, SEGMENT_SIZE)):
         seg_x, seg_y = get_line_segment(xs, ys, i)
 
-        new_xs, new_ys, yh = fit_best(seg_x, seg_y, i+1, isShowEquation, isVerbose)
+        new_xs, new_ys, yh = fit_best(seg_x, seg_y, i+1, use_cross_validation, k, rand_k_fold, verbose)
         
         err += square_err(seg_y, yh) 
-        if isPlot:
+        if plot:
             plt.plot(new_xs, new_ys, c="#FF7A77")
     
     return err
@@ -259,7 +343,9 @@ def seperate_opts_and_fnames(args):
     opts = []
 
     for arg in args:
-        if arg in available_args:
+        if arg.startswith("-k="):
+            opts.append(arg)
+        elif arg in available_args:
             opts.append(arg)
         elif os.path.isfile(arg) and arg.endswith(".csv"):
             fnames.append(arg)
@@ -271,27 +357,26 @@ def seperate_opts_and_fnames(args):
 def main(argv):
     opts, fnames = seperate_opts_and_fnames(argv)
 
-    if "--plot" in opts:
-        isPlot = True
-    else:
-        isPlot = False
+    plot, use_cross_validation, k, rand_k_fold, verbose = False, True, K_FOLD, False, False
 
-    if "-e" in opts:
-        isShowEquation = True
-    else:
-        isShowEquation = False
+    for opt in opts:
+        if opt == "--plot":
+            plot = True
+        elif opt == "-v":
+            verbose = True
+        elif opt == "--no-cross-validation":
+            use_cross_validation = False
+        elif opt.startswith("-k="):
+            k = int(opt[3:])
+        elif opt == "--random-k-fold":
+            rand_k_fold = True
 
-    if "-v" in opts:
-        isVerbose = True
-    else:
-        isVerbose = False
-
-    isShowEquation = True
+    verbose = True
 
     for fname in fnames:
         xs, ys = load_points_from_file(fname)
-        print(total_err(xs, ys, isPlot, isShowEquation, isVerbose))
-        if isPlot:
+        print(total_err(xs, ys, use_cross_validation, k, rand_k_fold, plot, verbose))
+        if plot:
             view_data_segments(xs, ys)
 
 main(sys.argv[1:])
