@@ -6,7 +6,7 @@ import random
 from matplotlib import pyplot as plt
 
 SEGMENT_SIZE = 20
-K_FOLD = 10
+K_FOLD = 5
 
 available_args = [
         "--plot",
@@ -44,6 +44,13 @@ def view_data_segments(xs, ys, segment_size = SEGMENT_SIZE):
     plt.show()
 
 def add_polynomial_term(X, x, degree):
+    """Extends X with a polynomial term of a given degree.
+    Args:
+        X : List/array-like of feature vectors.
+        x : List/array-like of x co-ordinates.
+    Returns:
+        An polynomially extended feature vector
+    """
     return np.column_stack((X, np.power(x, degree)))
 
 def add_bias(X):
@@ -62,67 +69,67 @@ def fit_line_of_best_fit(xs, model, *args):
 
 def fit_linear(xs):
     xe = add_bias(xs)
-    return xe
+    return xe, xs
 
 def fit_quadratic(xs):
-    xe = fit_linear(xs)
+    xe, xs = fit_linear(xs)
     xe = add_polynomial_term(xe, xs, 2)
-    return xe
+    return xe, xs
 
 def fit_cubic(xs):
-    xe = fit_quadratic(xs)
+    xe, xs = fit_quadratic(xs)
     xe = add_polynomial_term(xe, xs, 3)
-    return xe
+    return xe, xs
 
 def fit_quartic(xs):
-    xe = fit_cubic(xs)
+    xe, xs = fit_cubic(xs)
     xe = add_polynomial_term(xe, xs, 4)
-    return xe
+    return xe, xs
 
 def fit_quintic(xs):
-    xe = fit_quartic(xs)
+    xe, xs = fit_quartic(xs)
     xe = add_polynomial_term(xe, xs, 5)
-    return xe
+    return xe, xs
 
 def fit_6th_order(xs):
-    xe = fit_quintic(xs)
+    xe, xs = fit_quintic(xs)
     xe = add_polynomial_term(xe, xs, 6)
-    return xe
+    return xe, xs
 
 def fit_7th_order(xs):
-    xe = fit_6th_order(xs)
+    xe, xs = fit_6th_order(xs)
     xe = add_polynomial_term(xe, xs, 7)
-    return xe
+    return xe, xs
 
 def fit_8th_order(xs):
-    xe = fit_7th_order(xs)
+    xe, xs = fit_7th_order(xs)
     xe = add_polynomial_term(xe, xs, 8)
-    return xe
+    return xe, xs
 
 def fit_9th_order(xs):
-    xe = fit_8th_order(xs)
+    xe, xs = fit_8th_order(xs)
     xe = add_polynomial_term(xe, xs, 9)
-    return xe
+    return xe, xs
 
 def fit_10th_order(xs):
-    xe = fit_9th_order(xs)
+    xe, xs = fit_9th_order(xs)
     xe = add_polynomial_term(xe, xs, 10)
-    return xe
+    return xe, xs
 
 def fit_exp(xs):
     xe = np.exp(xs)
     xe = add_bias(xe)
-    return xe
+    return xe, xs
 
 def fit_sin(xs):
     xe = np.sin(xs)
     xe = add_bias(xe)
-    return xe
+    return xe, xs
 
 def fit_cos(xs):
     xe = np.cos(xs)
     xe = add_bias(xe)
-    return xe
+    return xe, xs
 
 # List of the functions of the models accompanied by their feature vector functions.
 models = [
@@ -268,7 +275,8 @@ def cross_validation(xs, ys, feature_vector, model, k = K_FOLD, rand_k_fold = Fa
             else:
                 train_ys = np.append(train_ys, part)
 
-        xe = feature_vector(train_xs)
+        xe, xs = feature_vector(train_xs)
+
         wh = fit_wh(xe, train_ys)
         yh = model(test_xs, *wh)
 
@@ -287,9 +295,11 @@ def fit_best(xs, ys, segment, use_cross_validation = True, k = K_FOLD, rand_k_fo
     """
     vals = []
     errs = []
+    indices = []
     for i, model in enumerate(models):
         if i in model_whitelist:
-            xe = model[1](xs)
+            indices.append(i)
+            xe, _ = model[1](xs)
             wh = fit_wh(xe, ys)
             yh = model[2](xs, *wh)
             new_xs, new_ys = fit_line_of_best_fit(xs, model[2], *wh)
@@ -303,7 +313,7 @@ def fit_best(xs, ys, segment, use_cross_validation = True, k = K_FOLD, rand_k_fo
     index = errs.index(min(errs))
 
     if verbose:
-        info = "Segment {}: {}".format(segment,models[index][0])
+        info = "Segment {}: {}".format(segment, models[indices[index]][0])
         print(info)
 
     fit = vals[index]
