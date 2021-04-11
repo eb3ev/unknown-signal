@@ -204,18 +204,18 @@ models = [
 # Comment out models to not not include in training.
 model_whitelist = [
         0, # Linear
-        # 1, # Quadratic
+        1, # Quadratic
         2, # Cubic
-        # 3, # Quadratic
-        # 4, # Quintic
-        # 5, # 6th Order Polynomial
-        # 6, # 7th Order Polynomial
-        # 7, # 8th Order Polynomoal
-        # 8, # 9th Order Polynomial
-        # 9, # 10th Order Polynomial
-        # 10, # Exponential
+        3, # Quadratic
+        4, # Quintic
+        5, # 6th Order Polynomial
+        6, # 7th Order Polynomial
+        7, # 8th Order Polynomoal
+        8, # 9th Order Polynomial
+        9, # 10th Order Polynomial
+        10, # Exponential
         11, # Sine
-        # 12, # Cosine
+        12, # Cosine
 ]
 
 def k_fold_parts(xs, ys, k = 10, randomize = False):
@@ -275,11 +275,10 @@ def cross_validation(xs, ys, feature_vector, model, k = K_FOLD, rand_k_fold = Fa
             else:
                 train_ys = np.append(train_ys, part)
 
-        xe, xs = feature_vector(train_xs)
-
+        xe = feature_vector(train_xs)[0]
+        
         wh = fit_wh(xe, train_ys)
         yh = model(test_xs, *wh)
-
         err += square_err(test_ys, yh)
 
     return err / k
@@ -298,8 +297,8 @@ def fit_best(xs, ys, segment, use_cross_validation = True, k = K_FOLD, rand_k_fo
     indices = []
     for i, model in enumerate(models):
         if i in model_whitelist:
+            xe = model[1](xs)[0]
             indices.append(i)
-            xe, _ = model[1](xs)
             wh = fit_wh(xe, ys)
             yh = model[2](xs, *wh)
             new_xs, new_ys = fit_line_of_best_fit(xs, model[2], *wh)
