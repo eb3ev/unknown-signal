@@ -276,10 +276,12 @@ def cross_validation(xs, ys, feature_vector, model, k = K_FOLD, rand_k_fold = Fa
                 train_ys = np.append(train_ys, part)
 
         xe = feature_vector(train_xs)[0]
-        
-        wh = fit_wh(xe, train_ys)
-        yh = model(test_xs, *wh)
-        err += square_err(test_ys, yh)
+        try:
+            wh = fit_wh(xe, train_ys)
+            yh = model(test_xs, *wh)
+            err += square_err(test_ys, yh)
+        except Exception:
+            k -= 1
 
     return err / k
 
@@ -297,17 +299,20 @@ def fit_best(xs, ys, segment, use_cross_validation = True, k = K_FOLD, rand_k_fo
     indices = []
     for i, model in enumerate(models):
         if i in model_whitelist:
-            xe = model[1](xs)[0]
-            indices.append(i)
-            wh = fit_wh(xe, ys)
-            yh = model[2](xs, *wh)
-            new_xs, new_ys = fit_line_of_best_fit(xs, model[2], *wh)
-            vals.append([new_xs, new_ys, yh])
-            if use_cross_validation:
-                err = cross_validation(xs, ys, model[1], model[2], k , rand_k_fold)
-            else:
-                err = square_err(ys, yh)
-            errs.append(err)
+            try:
+                xe = model[1](xs)[0]
+                indices.append(i)
+                wh = fit_wh(xe, ys)
+                yh = model[2](xs, *wh)
+                new_xs, new_ys = fit_line_of_best_fit(xs, model[2], *wh)
+                vals.append([new_xs, new_ys, yh])
+                if use_cross_validation:
+                    err = cross_validation(xs, ys, model[1], model[2], k , rand_k_fold)
+                else:
+                    err = square_err(ys, yh)
+                errs.append(err)
+            except Exception:
+                pass
 
     index = errs.index(min(errs))
 
