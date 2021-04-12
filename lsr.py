@@ -6,7 +6,7 @@ import random
 from matplotlib import pyplot as plt
 
 SEGMENT_SIZE = 20
-K_FOLD = 5
+K_FOLD = 10
 
 available_args = [
         "--plot",
@@ -63,73 +63,30 @@ def square_err(y, y_h):
     return np.sum((y - y_h)**2)
 
 def fit_line_of_best_fit(xs, model, *args):
-    new_xs = np.linspace(xs.min(), xs.max(), len(xs))
+    new_xs = np.linspace(xs.min(), xs.max(), len(xs) * 2)
     new_ys = model(new_xs, *args)
     return new_xs, new_ys
 
 def fit_linear(xs):
     xe = add_bias(xs)
-    return xe, xs
+    return xe
 
-def fit_quadratic(xs):
-    xe, xs = fit_linear(xs)
-    xe = add_polynomial_term(xe, xs, 2)
-    return xe, xs
-
-def fit_cubic(xs):
-    xe, xs = fit_quadratic(xs)
-    xe = add_polynomial_term(xe, xs, 3)
-    return xe, xs
-
-def fit_quartic(xs):
-    xe, xs = fit_cubic(xs)
-    xe = add_polynomial_term(xe, xs, 4)
-    return xe, xs
-
-def fit_quintic(xs):
-    xe, xs = fit_quartic(xs)
-    xe = add_polynomial_term(xe, xs, 5)
-    return xe, xs
-
-def fit_6th_order(xs):
-    xe, xs = fit_quintic(xs)
-    xe = add_polynomial_term(xe, xs, 6)
-    return xe, xs
-
-def fit_7th_order(xs):
-    xe, xs = fit_6th_order(xs)
-    xe = add_polynomial_term(xe, xs, 7)
-    return xe, xs
-
-def fit_8th_order(xs):
-    xe, xs = fit_7th_order(xs)
-    xe = add_polynomial_term(xe, xs, 8)
-    return xe, xs
-
-def fit_9th_order(xs):
-    xe, xs = fit_8th_order(xs)
-    xe = add_polynomial_term(xe, xs, 9)
-    return xe, xs
-
-def fit_10th_order(xs):
-    xe, xs = fit_9th_order(xs)
-    xe = add_polynomial_term(xe, xs, 10)
-    return xe, xs
+def fit_polynomial(xs, order):
+    assert order >= 2
+    xe = fit_linear(xs)
+    for i in range(2, order+1):
+        xe = add_polynomial_term(xe, xs, i)
+    return xe
 
 def fit_exp(xs):
     xe = np.exp(xs)
     xe = add_bias(xe)
-    return xe, xs
+    return xe
 
-def fit_sin(xs):
-    xe = np.sin(xs)
+def fit_trigonometry(xs, func):
+    xe = func(xs)
     xe = add_bias(xe)
-    return xe, xs
-
-def fit_cos(xs):
-    xe = np.cos(xs)
-    xe = add_bias(xe)
-    return xe, xs
+    return xe
 
 # List of the functions of the models accompanied by their feature vector functions.
 models = [
@@ -140,48 +97,48 @@ models = [
         ],    
         [
             "Quadratic",
-            fit_quadratic,
+            lambda x: fit_polynomial(x, 2),
             lambda x, a, b, c: a + b*x + c*x**2
         ],
         [
             "Cubic",
-            fit_cubic,
+            lambda x: fit_polynomial(x, 3),
             lambda x, a, b, c, d: a + b*x + c*x**2 + d*x**3
         ],
         [
             "Quartic",
-            fit_quartic,
+            lambda x: fit_polynomial(x, 4),
             lambda x, a, b, c, d, e: a + b*x + c*x**2 + d*x**3 + e*x**4
         ],
         [
             "Quintic",
-            fit_quintic,
+            lambda x: fit_polynomial(x, 5),
             lambda x, a, b, c, d, e, f: a + b*x + c*x**2 + d*x**3 + e*x**4 + f*x**5
         ],
         [
             "6th Order Polynomial",
-            fit_6th_order,
+            lambda x: fit_polynomial(x, 6),
             lambda x, a, b, c, d, e, f, g: a + b*x + c*x**2 + d*x**3 + e*x**4 + f*x**5 + g*x**6
 
         ],
         [
             "7th Order Polynomial",
-            fit_7th_order,
+            lambda x: fit_polynomial(x, 7),
             lambda x, a, b, c, d, e, f, g, h: a + b*x + c*x**2 + d*x**3 + e*x**4 + f*x**5 + g*x**6 + h*x**7
         ],
         [
             "8th Order Polynomial",
-            fit_8th_order,
+            lambda x: fit_polynomial(x, 8),
             lambda x, a, b, c, d, e, f, g, h, i: a + b*x + c*x**2 + d*x**3 + e*x**4 + f*x**5 + g*x**6 + h*x**7 + i*x**8
         ],
         [
             "9th Order",
-            fit_9th_order,
+            lambda x: fit_polynomial(x, 9),
             lambda x, a, b, c, d, e, f, g, h, i, j: a + b*x + c*x**2 + d*x**3 + e*x**4 + f*x**5 + g*x**6 + h*x**7 + i*x**8 + j*x**9
         ],
         [
             "10th Order",
-            fit_10th_order,
+            lambda x: fit_polynomial(x, 10),
             lambda x, a, b, c, d, e, f, g, h, i, j, k: a + b*x + c*x**2 + d*x**3 + e*x**4 + f*x**5 + g*x**6 + h*x**7 + i*x**8 + j*x**9 + k*x**10
         ],
         [
@@ -191,31 +148,31 @@ models = [
         ],
         [
             "Sine",
-            fit_sin,
+            lambda x: fit_trigonometry(x, np.sin),
             lambda x, a, b: a + b*np.sin(x)
         ],
         [
             "Cosine",
-            fit_cos,
+            lambda x: fit_trigonometry(x, np.cos),
             lambda x, a, b: a + b*np.cos(x)
         ],
 ]
 
 # Comment out models to not not include in training.
 model_whitelist = [
-        0, # Linear
-        1, # Quadratic
+        # 0, # Linear
+        # 1, # Quadratic
         2, # Cubic
-        3, # Quadratic
-        4, # Quintic
-        5, # 6th Order Polynomial
-        6, # 7th Order Polynomial
-        7, # 8th Order Polynomoal
-        8, # 9th Order Polynomial
-        9, # 10th Order Polynomial
-        10, # Exponential
+        # 3, # Quadratic
+        # 4, # Quintic
+        # 5, # 6th Order Polynomial
+        # 6, # 7th Order Polynomial
+        # 7, # 8th Order Polynomoal
+        # 8, # 9th Order Polynomial
+        # 9, # 10th Order Polynomial
+        # 10, # Exponential
         11, # Sine
-        12, # Cosine
+        # 12, # Cosine
 ]
 
 def k_fold_parts(xs, ys, k = 10, randomize = False):
@@ -275,7 +232,7 @@ def cross_validation(xs, ys, feature_vector, model, k = K_FOLD, rand_k_fold = Fa
             else:
                 train_ys = np.append(train_ys, part)
 
-        xe = feature_vector(train_xs)[0]
+        xe = feature_vector(train_xs)
         try:
             wh = fit_wh(xe, train_ys)
             yh = model(test_xs, *wh)
@@ -300,8 +257,7 @@ def fit_best(xs, ys, segment, use_cross_validation = True, k = K_FOLD, rand_k_fo
     for i, model in enumerate(models):
         if i in model_whitelist:
             try:
-                xe = model[1](xs)[0]
-                indices.append(i)
+                xe = model[1](xs)
                 wh = fit_wh(xe, ys)
                 yh = model[2](xs, *wh)
                 new_xs, new_ys = fit_line_of_best_fit(xs, model[2], *wh)
@@ -311,6 +267,7 @@ def fit_best(xs, ys, segment, use_cross_validation = True, k = K_FOLD, rand_k_fo
                 else:
                     err = square_err(ys, yh)
                 errs.append(err)
+                indices.append(i)
             except Exception:
                 pass
 
@@ -386,7 +343,6 @@ def main(argv):
             rand_k_fold = True
 
     verbose = True
-
     for fname in fnames:
         xs, ys = load_points_from_file(fname)
         print(total_err(xs, ys, use_cross_validation, k, rand_k_fold, plot, verbose))
