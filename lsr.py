@@ -44,25 +44,51 @@ def view_data_segments(xs, ys, segment_size = SEGMENT_SIZE):
     plt.show()
 
 def add_polynomial_term(X, x, degree):
-    """Extends X with a polynomial term of a given degree.
+    """Extends X with a column of x^degree to the right.
     Args:
         X : List/array-like of feature vectors.
         x : List/array-like of x co-ordinates.
+        degree : The power to raise x.
     Returns:
         An polynomially extended feature vector
     """
     return np.column_stack((X, np.power(x, degree)))
 
 def add_bias(X):
+    """Extends X with a column of ones to the left.
+    Args:
+        X : List/array-like of feature vectors.
+        x : List/array-like of x co-ordinates.
+    Returns:
+        A feature vector with a column of ones in the 
+        first column.
+    """
     return np.column_stack((np.ones(X.shape), X))
 
 def fit_wh(X, Y):
+    """Least squares regression.
+    Args:
+        X : List/array-like of x's feature vectors.
+        Y : List/array-like of y co-ordinates.
+    Returns:
+        The coefficient vector of the least squares regression.
+    """
     return np.linalg.inv(X.T.dot(X)).dot(X.T).dot(Y)
 
 def square_err(y, y_h):
     return np.sum((y - y_h)**2)
 
 def fit_line_of_best_fit(xs, model, *args):
+    """Least squares regression.
+    Args:
+        xs : List/array-like of x co-ordinates.
+        model : The model to use for the line.
+        *args : The coefficients to use.
+    Returns:
+        The List/array-like of x co-ordinates and a
+        List/array-like of y co-ordinates to plot respectively
+        in that order.
+    """
     new_xs = np.linspace(xs.min(), xs.max(), len(xs) * 2)
     new_ys = model(new_xs, *args)
     return new_xs, new_ys
@@ -160,7 +186,7 @@ models = [
 
 # Comment out models to not not include in training.
 model_whitelist = [
-        # 0, # Linear
+        0, # Linear
         # 1, # Quadratic
         2, # Cubic
         # 3, # Quadratic
@@ -342,7 +368,6 @@ def main(argv):
         elif opt == "--random-k-fold":
             rand_k_fold = True
 
-    verbose = True
     for fname in fnames:
         xs, ys = load_points_from_file(fname)
         print(total_err(xs, ys, use_cross_validation, k, rand_k_fold, plot, verbose))
