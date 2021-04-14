@@ -340,14 +340,12 @@ def seperate_opts_and_fnames(args):
     opts = []
 
     for arg in args:
-        if arg.startswith("-k="):
-            opts.append(arg)
-        elif arg in available_args:
+        if arg in available_args or arg.startswith("-k="):
             opts.append(arg)
         elif os.path.isfile(arg) and arg.endswith(".csv"):
             fnames.append(arg)
         else:
-            print("Invalid Arg: " + arg)
+            sys.exit("Invalid Arg: " + arg)
 
     return opts, fnames
 
