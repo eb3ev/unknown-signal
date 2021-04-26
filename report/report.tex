@@ -50,11 +50,41 @@ and this can differ per run.
 The program iterates through a list of defined models. These models are a list
 object of their own and contains the properties that'll allow it to model a
 data set using LSM. These properties are it's name, the relevant function required
-to extend the $X$ vector with the relevant feature vectors and the equation
-to use. The data is modelled using each of this models and the RSS is calculated
-for each one or to be more precise, the CV error, which corresponds to the average
-RSS value that was calculated during the CV process. The model that produced the
-minimum error gets chosen as the model to use for that data set.
+to extend the $X$ vector with the relevant feature vectors, where $X$ is the x
+data points, and also the equation to use. The data is modelled using each of this models
+and the RSS is calculated for each one or to be more precise, the CV error, which
+corresponds to the average RSS value that was calculated during the CV process.
+The model that produced the minimum error gets chosen as the model to use for
+that data set.
+
+\begin{center}
+    \begin{tabular}{l c c}
+        \toprule
+        \textbf{Name} & \textbf{Equation} & \textbf{Expanded $X$ Vector} \\
+        \midrule
+        Linear
+            & $a_0 + a_1x_i$
+            & hello
+            \\
+        Polynomial
+            & $a_0 + a_1x_i + a_2x_i^2 + \dots + a_nx_i^n$
+            &
+            \\
+        Exponential
+            & $a_0 + a_1e^x_i$
+            & asdf
+            \\
+        Sine
+            & $a_0 + a_1sin(x_i)$
+            & asdf
+            \\
+        Cosine
+            & $a_0 + a_1cos(x_i)$
+            & asdf
+            \\
+        \bottomrule
+    \end{tabular}
+\end{center}
 
 \section{Results}
 
