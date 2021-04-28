@@ -1,6 +1,6 @@
 
 k = 10
-args = --no-cross-validation -v
+args = -v
 
 all: basic adv noise
 

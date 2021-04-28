@@ -60,7 +60,7 @@ can be split up like so; $[[8, 3, 19, 7], [10, 2, 14, 4], \dots, [15, 1, 0, 8]]$
 and this can differ per run. 
 \\ \\
 The program iterates through a list of defined models as described in Table
-\ref{table:models} where $\hat{y}$ is the resulting regression function. These
+\ref{tab:models} where $\hat{y}$ is the resulting regression function. These
 models are a list object of their own and contains the properties that'll allow it
 to model a data set using LSR. These properties are it's name, the relevant function required
 to extend the $X$ vector with the relevant feature vectors, where $X$ consists of the x
@@ -74,7 +74,7 @@ as the model to use for that data set.
     \centering
     \begin{threeparttable}
     \caption{Models}
-    \label{table:models}
+    \label{tab:models}
     \begin{tabular}{l c c}
         \toprule
         Name & $X$ & $\hat{y}$ \\
@@ -97,9 +97,9 @@ as the model to use for that data set.
             \\ \\
         Exponential
             & $\begin{bmatrix}
-                1      & e^x_0       \\
-                \vdots & \vdots      \\
-                1      & e^x_{N - 1} 
+                1      & e^{x_0}       \\
+                \vdots & \vdots        \\
+                1      & e^{x_{N - 1}}
                \end{bmatrix}$
             & $a_0 + a_1e^{x_i}$
             \\ \\
@@ -158,13 +158,13 @@ in the line segments, these were ruled out as cases of overfitting.
 \\ \\
 These redundant models were then commented out for future runs of the program
 and therefore were not part of the iteration of the list of models to fit the data
-in. An instance of this is shown in Table \ref{table:result1}
+in. An instance of this is shown in Table \ref{tab:result1}
 
 \begin{table}[ht!]
     \scriptsize
     \centering
     \caption{Results of training data files using a fixed 10-fold CV}
-    \label{table:result1}
+    \label{tab:main_results}
     \begin{tabular}{l l l}
         \toprule
         File (.csv) & RSS & Fitted Models \textit{w.r.t.} the Line Segments \\
@@ -220,10 +220,11 @@ in. An instance of this is shown in Table \ref{table:result1}
 \FloatBarrier
 
 \begin{table}[ht!]
+    \begin{minipage}{0.5\linewidth}
     \scriptsize
     \centering
     \caption{Results of noise training data files without CV}
-    \label{table:result1}
+    \label{tab:noise_no_cv_results}
     \begin{tabular}{l l l}
         \toprule
         File (.csv) & RSS & Fitted Models \textit{w.r.t.} the Line Segments \\
@@ -242,21 +243,79 @@ in. An instance of this is shown in Table \ref{table:result1}
         \\
         \bottomrule
     \end{tabular}
+    \end{minipage}
+    \begin{minipage}{0.5\linewidth}
+    \centering
+    \includegraphics[width=1\linewidth]{res/noise_1_no_cv.png}
+    \captionof{figure}{Plot of fitted line of \textit{noise\_1.csv} from Table \ref{tab:noise_no_cv_results}}
+    \label{fig:noise_1_no_cv}
+    \end{minipage}
 \end{table}
 
 \FloatBarrier
 
-\begin{figure}[ht!]
-    %\begin{minipage}{0.5\linewidth}
+\begin{table}[ht!]
+    \begin{minipage}{0.5\linewidth}
+    \scriptsize
     \centering
-    \caption{Plot of fitted line of \textit{noise\_1.csv} without CV}
-    \label{fig:noise1NoCV}
-    \includegraphics[width=0.5\linewidth]{res/noise_1_no_cv.png}
-    %\end{minipage}
-\end{figure}
+    \caption{Results of multiple runs of adv\_3.csv using a random 5-fold CV}
+    \label{tab:result1}
+    \begin{tabular}{l l l}
+        \toprule
+        Run & RSS & Fitted Models \textit{w.r.t.} the Line Segments \\
+        \midrule
+        1
+            & \num{1020.76902787}
+            & Linear, Cubic, Sinusoidal, Linear, Sinusoidal, Cubic
+        \\
+        2
+            & \num{1008.18577729}
+            & Linear, Cubic, Sinusoidal, Cubic, Sinusoidal, Cubic
+        \\
+        3
+            & \num{993.507417746}
+            & Cubic, Cubic, Sinusoidal, Linear, Sinusoidal, Cubic
+        \\
+        4
+            & \num{1019.02994947}
+            & Sinusoidal, Cubic, Sinusoidal, Linear, Sinusoidal, Cubic
+        \\
+        5
+            & \num{1019.02994947}
+            & Sinusoidal, Cubic, Sinusoidal, Linear, Sinusoidal, Cubic
+        \\
+        6
+            & \num{1006.4466989}
+            & Sinusoidal, Cubic, Sinusoidal, Cubic, Sinusoidal, Cubic
+        \\
+        7
+            & \num{1006.4466989}
+            & Sinusoidal, Cubic, Sinusoidal, Cubic, Sinusoidal, Cubic
+        \\
+        8
+            & \num{1020.76902787}
+            & Linear, Cubic, Sinusoidal, Linear, Sinusoidal, Cubic
+        \\
+        9
+            & \num{1008.18577729}
+            & Linear, Cubic, Sinusoidal, Cubic, Sinusoidal, Cubic
+        \\
+        10
+            & \num{1019.02994947}
+            & Sinusoidal, Cubic, Sinusoidal, Linear, Sinusoidal, Cubic
+        \\
+        \bottomrule
+    \end{tabular}
+    \end{minipage}
+    \begin{minipage}{0.5\linewidth}
+    \centering
+    \includegraphics[width=1\linewidth]{res/adv_3.png}
+    \captionof{figure}{Plot of fitted line of \textit{adv\_3.csv} from Table \ref{tab:main_results}}
+    \label{fig:noise_1_no_cv}
+    \end{minipage}
+\end{table}
 
-
-
+\FloatBarrier
 \section{Conclusion}
 
 \end{document}
