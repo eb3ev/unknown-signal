@@ -1,6 +1,6 @@
 
 k = 10
-args = -v
+args = 
 
 all: basic adv noise
 

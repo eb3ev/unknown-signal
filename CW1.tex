@@ -25,9 +25,9 @@ As an operator for a nuclear early warning device you receive an unknown signal.
 \label{sec:task}
 In this coursework you will be given example points which follow an unknown signal.
 You will be required to reconstruct the signal and give the resulting error.
-Your mark will be based on a report you write about the code, submitted to the ``Data-Driven Computer Science Coursework'' submission point.
+\textbf{Your mark will be based on a report you write about the code, submitted to the ``Data-Driven Computer Science Coursework'' submission point.
 You will also submit the code as a single python file to ``Code submission point''.  
-We will check that the code satisfies the basic requirements (in the implementation section) and for plagarism, but we won't assess its performance.
+We will check that the code satisfies the basic requirements (in the implementation section) and for plagarism, but we won't assess its performance. [The previous passage is highlighted from the original text. It means that in the absence of serious issues such as nonexistant/clearly nonsense implementation or plagarism, mark is 100\% driven by report.  In general, we will not be running the code, so details such as paths to files, or output format don't matter].}
 
 You are required to work on this coursework individually. You may consult with your peers on the concepts and spirit of the assignment/solution, but you may not exchange code or passages of text for the report.
 
@@ -42,8 +42,8 @@ Your solution should:
   \item Determine the function type of line segment, 
   \begin{itemize}
     \item linear
-    \item polynomial with a fixed order that you must determine
-    \item unknown nonlinear function that you must determine
+    \item polynomial with a fixed order that you must determine (same order for all segments in all files)
+    \item unknown nonlinear function that you must determine (same function for all segments in all files)
   \end{itemize}
   \item Use maximum-likelihood/least squares regression to fit the function
   \item Produce the total reconstruction error 
@@ -51,13 +51,13 @@ Your solution should:
 \end{itemize}
 
 \paragraph{Note:} All Code written for the least squares regression sections must be written by yourself.
-The only external libraries your solution should use are:
+You can use anything in the Python standard library (https://docs.python.org/3/library/) but the only external libraries your solution should use are:
 \begin{itemize}
   \item Numpy
   \item Pandas
   \item Matplotlib
 \end{itemize}
-Builtins e.g. from \texttt{os}, \texttt{sys}, or \texttt{argparse} are fine.  But Scipy/Torch are not!
+e.g. \texttt{scipy}, \texttt{sk\_learn} and \texttt{torch} are not permitted.
 
 \section{Report}
 
@@ -65,11 +65,12 @@ The aim of this report is to demonstrate your understanding of methods you used,
 The report should be no more than 4 pages long, using no less than 11 point font, with at least 2 cm margins.
 You should include:
 \begin{itemize}
-  \item Equations for linear regression.
+  \item (Briefly) equations for linear regression.
   \item Justification for your choice of polynomial order.  Include plots.
   \item Justification for your choice of unknown function.  Include plots.
-  \item Description of your proceedure for selecting between linear/polynomial/unknown functions, accounting for overfitting.
+  \item Description of your proceedure for selecting between linear/polynomial/unknown functions, accounting for overfitting.  Marks won't be based on the exact choice of proceedure as long as there's some attempt to deal with overfitting.  But top marks will be available for a discussing the advantages and disadvantages of your particular method.  e.g.\ does it give different answers depending on the random seed?  did you choose to make the method slightly less accurated in exchange for being faster? are there some examples where your method (or other methods you considered) fail? if so why? how much does it matter? how could we fix it?  (Please don't try to answer all of these questions, the discussion will depend alot on your proceedure and how you arrived at it).
 \end{itemize}
+
 
 %\section{Marks}
 %\label{sec:marks}
@@ -154,9 +155,9 @@ Test files could consist of any number of line segments (\textit{i.e.} longer th
 \section{Input/Output}
 \label{sec:IO}
 
-The auto-marker will expect a program called \textbf{lsr.py} (\textbf{not a jupyter notebook}) which will be run as follows:
+We expect a program called \textbf{lsr.py} (\textbf{not a jupyter notebook}) which will be run as follows:
 \begin{verbatim}
-    $ python lsr.py test_2.csv
+    $ python lsr.py basic_2.csv
 \end{verbatim}
 
 After execution your program should print out the total reconstruction error, created by summing the error for every line segment, followed by a newline character:
@@ -168,7 +169,7 @@ After execution your program should print out the total reconstruction error, cr
 \end{verbatim}
 
 Additionally, to further understand and validate your solution we wish for your program to be able to visualise the result given an optional parameter, \texttt{--plot}.
-This is only to visually check that your solution is working and will not be part of the automarker (styling of the plot itself doesn't matter).
+This is only to visually check that your solution is working (and so that you can save plots for your report).
 For example, running:
 
 \begin{verbatim}
@@ -192,7 +193,33 @@ Note the presence of both the original points (blue dots) and fitted line segmen
     \item The error you need to calculate is the sum squared error. 
     \item Regardless of the number of segments your program needs to only output the total reconstruction error. 
     \item The test files will include points approximating line segments generated from the three functions mentioned above, \textit{i.e.} linear, polynomial or the unknown function. 
-    \item The order of the polynomial function \textbf{will not} change between different files.
+    \item The order of the polynomial (and the form of the unknown function) \textbf{will not} change between different files/segments.
     \item Having a very low error might not be the correct answer to a noisy solution, refer to overfitting in the lecture slides. 
+    \item You probably shouldn't use regularisation (the coursework is designed under the assumption that you'll use the simplest possible function classes to mitigate overfitting, rather than regularisation).
+    \item In some settings (especially with noisy data), you might improve cross-validation performance by using a polynomial with a too-low order.  We're really looking for the one polynomial (remember, same across all segments in all files) that we used to generate data.  So you might find segments where using a too-low order to mitigate overfitting helps cross-validation sometimes.  (Noise-free data are your friend here).
 \end{itemize}
+
+\appendix
+
+\section{Odd vertical offsets and the precision of matrix inversion}
+
+In a recent Q\&A session, Peter Marsh raised the issue of strange vertical offsets when using the usual formula for linear regression, especially when using higher-order polynomials.
+
+\includegraphics[width=0.4\textwidth]{offset.png}
+
+Importantly, you don't actually need to address this issue to solve the CW (which is why we hadn't uncovered the issue until now; it seems to emerge mainly for a few segements and for polynomials that are higher-order than the true ones).
+
+\textbf{Further, we only got to the bottom of these issues a week before the final deadline, so no one is going to be penalised if they don't deal with this issue (or even for including plots that look like this)! There are no marks for discussing these issues in the report (you can include it, but it will take space away from topics that will be marked).}
+
+Matthew Nagy and Jonathan Marriott noted that this might be an issue with the numerical stability in the matrix inversion.
+In particular, \texttt{np.linalg.inv} gives ever-so-slightly wrong answers, and in a few settings this can cause major issues in the plotting.
+There are a few potential solutions.
+\begin{itemize}
+  \item Note that the $x$'s in this plot are all large and postive.  This causes all the $x$, $x^2$, $x^3$ features to be highly correlated, which can cause instabilities. To fix this, you could include an additive offset for the $x$'s (in this example subtracting $\sim 20$) to make the $x$'s roughly centered on $0$.  Note that this only works because polynomials with an additive offset in the $x$'s are still polynomials (i.e. $a x^2 + b x + c = a' (x-\theta)^2 + b' (x-\theta) + c'$).  This might not be true for the unknown function, so \textbf{don't add an x-offset when fitting the unknown function!}
+  \item Use $(\mathbf{X}^T \mathbf{X} + \delta \mathbf{I})^{-1}$ rather than $(\mathbf{X}^T \mathbf{X})^{-1}$, where $\delta$ is small relative to $\mathbf{X}^T \mathbf{X}$.  The extra diagonal component should make the matrix inverse more stable.  But be careful!  This is very similar to regularisation, so may make higher-order polynomials appear to fit better.
+  \item Combine the matrix-multiply and matrix-inverse operations using \texttt{np.linalg.solve} rather than \texttt{np.linalg.inv}.  This is probably the hardest to implement,because the documentation for \texttt{np.linalg.solve} isn't very good, and I can't give more details on how top use it effectively without giving away a key part of the solution.  So if you're not happy with this approach and you still need to resolve this issue, try one of the first two approaches!
+\end{itemize}
+As always with numerical computations, these strategies may work in some circumstances and fail in others, so always do careful testing!
+And it certainly isn't the case that one of these is the ``best'' answer.
+
 \end{document}

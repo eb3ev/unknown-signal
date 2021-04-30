@@ -11,7 +11,6 @@ K_FOLD = 10
 available_args = [
         "--plot",
         "--no-cross-validation",
-        "-k",
         "--random-k-fold",
         "-v",
 ]
@@ -173,12 +172,12 @@ models = [
             lambda x, a, b: a + b*np.exp(x)
         ],
         [
-            "Sine",
+            "Sinusoidal",
             lambda x: fit_trigonometry(x, np.sin),
             lambda x, a, b: a + b*np.sin(x)
         ],
         [
-            "Cosine",
+            "Cosinusoidal",
             lambda x: fit_trigonometry(x, np.cos),
             lambda x, a, b: a + b*np.cos(x)
         ],
